@@ -14,14 +14,32 @@ namespace WebAppExample.Models
                                 && context.Categories.Count() == 0)
             {
                 Supplier s1 = new Supplier
-                { Name = "Splash Dudes", City = "San Jose" };
+                {
+                    Name = "Splash Dudes",
+                    City = "San Jose"
+                };
                 Supplier s2 = new Supplier
-                { Name = "Soccer Town", City = "Chicago" };
+                {
+                    Name = "Soccer Town",
+                    City = "Chicago"
+                };
                 Supplier s3 = new Supplier
-                { Name = "Chess Co", City = "New York" };
-                Category c1 = new Category { Name = "Watersports" };
-                Category c2 = new Category { Name = "Soccer" };
-                Category c3 = new Category { Name = "Chess" };
+                {
+                    Name = "Chess Co",
+                    City = "New York"
+                };
+                Category c1 = new Category
+                {
+                    Name = "Watersports"
+                };
+                Category c2 = new Category
+                {
+                    Name = "Soccer"
+                };
+                Category c3 = new Category
+                {
+                    Name = "Chess"
+                };
                 context.Products.AddRange(
                     new Product
                     {
