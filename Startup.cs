@@ -6,6 +6,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using WebAppExample.Models;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using WebAppExample.Extensions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace WebAppExample
 {
@@ -30,11 +35,11 @@ namespace WebAppExample
                 {
                     options.EnableSensitiveDataLogging(true);
                 }
-            });
+            }, ServiceLifetime.Scoped);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, DataContext context,
+        public void Configure(IApplicationBuilder app, DataContext dbContext,
             IHostApplicationLifetime lifetime)
         {
             if (Environment.IsDevelopment())
@@ -45,7 +50,7 @@ namespace WebAppExample
                 if (bool.TryParse(Configuration["INITDB"], out runSeedDataBase) &&
                      runSeedDataBase)
                 {
-                    SeedData.SeedDataBase(context);
+                    SeedData.SeedDataBase(dbContext);
                     lifetime.StopApplication();
                 }
             }
@@ -59,8 +64,9 @@ namespace WebAppExample
                 endpoints.MapGet("/", async context =>
                 {
                     await context.Response.WriteAsync("Hello World!\n");
-                    await context.Response.WriteAsync(Environment.IsDevelopment().ToString());
                 });
+
+                endpoints.UseWebServiceEndPoint();
             });
 
 
