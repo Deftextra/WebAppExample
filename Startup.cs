@@ -50,6 +50,8 @@ namespace WebAppExample
                 }
             }
 
+            app.UseMiddleware<TestMiddleware>();
+
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
