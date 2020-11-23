@@ -2,12 +2,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebAppExample.Models
 {
+
     public class Product
     {
         public long ProductId { get; set; }
-        public string Name {get;set;}
+        public string Name { get; set; }
 
-        [Column(TypeName = "decimal(8, 2)")]
+        [Column(TypeName = "decimal(8, 2)")] 
         public decimal Price { get; set; }
         public long CategoryId { get; set; }
         public Category Category { get; set; }

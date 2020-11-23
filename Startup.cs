@@ -1,69 +1,79 @@
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
 using WebAppExample.Models;
+using WebAppExample.Models.ValueProviders;
 
 namespace WebAppExample
 {
     public class Startup
     {
+        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _environment;
 
-        private readonly IConfiguration Configuration;
-        private IWebHostEnvironment Environment;
         public Startup(IConfiguration config, IWebHostEnvironment env)
         {
-            Configuration = config;
-            Environment = env;
+            _configuration = config;
+            _environment = env;
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<DataContext>(options =>
-            {
-                options.UseSqlServer(Configuration["ConnectionStrings:ProductConnection"]);
 
-                if (Environment.IsDevelopment())
+            {
+                options.UseSqlServer(_configuration["ConnectionStrings:ProductConnection"]);
+
+                if (_environment.IsDevelopment())
                 {
                     options.EnableSensitiveDataLogging(true);
                 }
             });
+
+            services.AddControllers(opts => { opts.ValueProviderFactories.Add(new CustomValueProviderFactory()); });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, DataContext context,
+        // This method gets called by the runtime. Use this methodcc to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, DataContext dbContext,
             IHostApplicationLifetime lifetime)
         {
-            if (Environment.IsDevelopment())
+            if (_environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
 
-                bool runSeedDataBase;
-                if (bool.TryParse(Configuration["INITDB"], out runSeedDataBase) &&
-                     runSeedDataBase)
+                if (bool.TryParse(_configuration["INITDB"], out var runSeedDataBase) &&
+                    runSeedDataBase)
                 {
-                    SeedData.SeedDataBase(context);
+                    SeedData.SeedDataBase(dbContext);
                     lifetime.StopApplication();
                 }
             }
-
-            app.UseMiddleware<TestMiddleware>();
 
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Hello World!\n");
-                    await context.Response.WriteAsync(Environment.IsDevelopment().ToString());
-                });
+                endpoints.MapControllerRoute(
+                    name: "Blog",
+                    pattern: "/blog/{*article}",
+                    defaults: new {controller = "Blog", action = "Article"}
+               );
+                    
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}",
+                    constraints: null,
+                    dataTokens: new { Namespace = "Testing", hello = "helloall" }
+                );
             });
-
-
         }
     }
 }
