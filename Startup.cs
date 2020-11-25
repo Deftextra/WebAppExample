@@ -1,32 +1,43 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using WebAppExample.Models;
+using WebAppExample.Services;
 
 namespace WebAppExample
 {
     public class Startup
     {
+        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _environment;
 
-        private readonly IConfiguration Configuration;
-        private IWebHostEnvironment Environment;
         public Startup(IConfiguration config, IWebHostEnvironment env)
         {
-            Configuration = config;
-            Environment = env;
+            _configuration = config;
+            _environment = env;
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<Counter>();
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: CorsPolicy.Test, builder =>
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyHeader();
+
+                });
+            });
+            services.AddControllers();
             services.AddDbContext<DataContext>(options =>
             {
-                options.UseSqlServer(Configuration["ConnectionStrings:ProductConnection"]);
+                options.UseSqlServer(_configuration["ConnectionStrings:ProductConnection"]);
 
-                if (Environment.IsDevelopment())
+                if (_environment.IsDevelopment())
                 {
                     options.EnableSensitiveDataLogging(true);
                 }
@@ -37,33 +48,26 @@ namespace WebAppExample
         public void Configure(IApplicationBuilder app, DataContext context,
             IHostApplicationLifetime lifetime)
         {
-            if (Environment.IsDevelopment())
+            if (_environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
 
-                bool runSeedDataBase;
-                if (bool.TryParse(Configuration["INITDB"], out runSeedDataBase) &&
-                     runSeedDataBase)
+                if (bool.TryParse(_configuration["INITDB"], out var runSeedDataBase) &&
+                    runSeedDataBase)
                 {
                     SeedData.SeedDataBase(context);
                     lifetime.StopApplication();
                 }
             }
 
-            app.UseMiddleware<TestMiddleware>();
-
+            // Add this point we match a http context to a route.
             app.UseRouting();
 
+            // Here to http request is routed to the correct endpoint.
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Hello World!\n");
-                    await context.Response.WriteAsync(Environment.IsDevelopment().ToString());
-                });
+                endpoints.MapControllers();
             });
-
-
         }
     }
 }
