@@ -1,5 +1,13 @@
+using System.Linq;
+using System.Net;
+using System.Runtime.InteropServices.ComTypes;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing.Template;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -19,9 +27,9 @@ namespace WebAppExample
             _configuration = config;
             _environment = env;
         }
-
-        public void ConfigureServices(IServiceCollection services)
+       public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<JsonOptions>(opts => { opts.JsonSerializerOptions.IgnoreNullValues = true; });
             services.AddSingleton<Counter>();
             services.AddCors(options =>
             {
@@ -29,7 +37,6 @@ namespace WebAppExample
                 {
                     builder.AllowAnyOrigin()
                         .AllowAnyHeader();
-
                 });
             });
             services.AddControllers();
@@ -63,9 +70,14 @@ namespace WebAppExample
             // Add this point we match a http context to a route.
             app.UseRouting();
 
+            app.UseCors();
+
             // Here to http request is routed to the correct endpoint.
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapGet("/{hello}/[hello]",
+                    async httpContext => { await httpContext.Response.WriteAsync("testing"); });
+
                 endpoints.MapControllers();
             });
         }

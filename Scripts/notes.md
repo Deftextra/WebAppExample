@@ -1,5 +1,6 @@
 * The follwowing routing parameters are reserved when using controllers or Razor pages.
 1. Action
+
 2. area
 3. controller
 4. handler
@@ -35,3 +36,13 @@
 * Get request should be read-only inforamation retrieval and should be save. That is,
 it does not change anything on the server. (It is a impodent operation,)
 
+
+## Routing
+
+* ActionEndpointFactory - this is the factory which creates our enpoint. It does not inherit from endpointBuilder.
+* When we call different types of endponts.Map methods we are essentially adding ModelDatasources!!!
+
+ * We have two main componens in routing The EndpointDatasource and the conventions builder. The Enpoint datasource holds a set of Endpoints.
+ when these enpoints build we apply the conventions to all the endpoints in the datasource
+ 
+ * The controller and action name are always part of the routValues (default)

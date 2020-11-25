@@ -9,7 +9,7 @@ using WebAppExample.Models;
 namespace WebAppExample.Controllers
 {
     [ApiController]
-    [Route("/api/[controller]")]
+    [Route("/api/[action]")]
     [EnableCors(policyName: "Test")]
     public class ProductsController : ControllerBase
     {
@@ -20,39 +20,45 @@ namespace WebAppExample.Controllers
             _dbContext = dbContext;
         }
 
+        // api/products
         [HttpGet]
-        public IAsyncEnumerable<Product> GetProducts()
+        public IAsyncEnumerable<Product> Products()
         {
+            // returns an object is equivelant to return ok(returnType)
+            // when action method is null is equivelant to returning null.
             return _dbContext.Products;
         }
 
 
+        // api/Product
         [HttpPost]
-        public async Task<StatusCodeResult> CreateProduct(ProductBindingTarget productBindingTarget)
+        public async Task<IActionResult> Product(ProductBindingTarget productBindingTarget)
         {
-            await _dbContext.Products.AddAsync(productBindingTarget.ToProduct());
-            await _dbContext.SaveChangesAsync();
-            
-            return StatusCode(StatusCodes.Status201Created);
+                await _dbContext.Products.AddAsync(productBindingTarget.ToProduct());
+                await _dbContext.SaveChangesAsync();
+                return Ok(productBindingTarget);
         }
 
+        //api/Product
         [HttpDelete("{id}")]
-        public async Task DeleteProduct(long id)
+        public async Task Product(long id)
         {
             _dbContext.Products.Remove(new Product() {ProductId = id});
 
             await _dbContext.SaveChangesAsync();
         }
 
+        // api/Product
         [HttpPut]
-        public async Task UpdateProduct(Product product)
+        public async Task Product(Product product)
         {
             _dbContext.Products.Update(product);
             await _dbContext.SaveChangesAsync();
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetProduct(long id, [FromServices] ILogger<ProductsController> logger)
+        // api/Product/{id?}
+        [HttpGet("{id?}")]
+        public async Task<IActionResult> Product(long id, [FromServices] ILogger<ProductsController> logger)
         {
             var product = await _dbContext.Products.FindAsync(id);
             if (product == null)
@@ -63,7 +69,22 @@ namespace WebAppExample.Controllers
 
             logger.LogInformation($"product with id = {id} found");
 
+
             return Ok(product);
+        }
+
+
+        // api/Redirect
+        [HttpGet("{value=hello}")]
+        public IActionResult RedirectTest(string value)
+        {
+            var endpoint = HttpContext.GetEndpoint();
+
+
+            return RedirectToRoute(new
+            {
+                controller = "Products", action = "Product", id = "1"
+            });
         }
     }
 }

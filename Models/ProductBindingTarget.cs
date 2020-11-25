@@ -1,11 +1,13 @@
-﻿namespace WebAppExample.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WebAppExample.Models
 {
     public class ProductBindingTarget
     {
-        public string Name { get; set; }
-        public decimal Price { get; set; }
-        public long CategoryId { get; set; }
-        public long SupplierId { get; set; }
+        [Required] public string Name { get; set; }
+        [Range(1, 1000)] public decimal Price { get; set; }
+        [Range(1, long.MaxValue)] public long CategoryId { get; set; }
+        [Range(1, long.MaxValue)] public long SupplierId { get; set; }
 
         public Product ToProduct() => new Product()
         {
