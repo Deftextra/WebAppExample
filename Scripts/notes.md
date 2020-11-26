@@ -46,3 +46,13 @@ it does not change anything on the server. (It is a impodent operation,)
  when these enpoints build we apply the conventions to all the endpoints in the datasource
  
  * The controller and action name are always part of the routValues (default)
+ 
+ ## REST.
+ 
+ * With the HTTP patch method, it is possible to send only the data which has changed in the server to update
+ 
+ ## REST.
+ 
+ * With the HTTP patch method, it is possible to send only the data which has changed in the server to update.
+   This is only usefull if the model needed to send to the server is very large, that is, larger than the PATCH requests.
+   

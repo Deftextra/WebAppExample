@@ -27,9 +27,18 @@ namespace WebAppExample
             _configuration = config;
             _environment = env;
         }
-       public void ConfigureServices(IServiceCollection services)
+
+        public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<JsonOptions>(opts => { opts.JsonSerializerOptions.IgnoreNullValues = true; });
+            // services.Configure<JsonOptions>(opts => { opts.JsonSerializerOptions.IgnoreNullValues = true; });
+            // Change json serializer.
+            services.AddControllers().AddNewtonsoftJson();
+
+            services.Configure<MvcNewtonsoftJsonOptions>(opts =>
+            {
+                opts.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+            });
+
             services.AddSingleton<Counter>();
             services.AddCors(options =>
             {
@@ -39,7 +48,6 @@ namespace WebAppExample
                         .AllowAnyHeader();
                 });
             });
-            services.AddControllers();
             services.AddDbContext<DataContext>(options =>
             {
                 options.UseSqlServer(_configuration["ConnectionStrings:ProductConnection"]);
