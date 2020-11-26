@@ -54,5 +54,12 @@ it does not change anything on the server. (It is a impodent operation,)
  ## REST.
  
  * With the HTTP patch method, it is possible to send only the data which has changed in the server to update.
-   This is only usefull if the model needed to send to the server is very large, that is, larger than the PATCH requests.
+   This is only useful if the model needed to send to the server is very large, that is, larger than the PATCH requests.
+   
+ * Action results depend on four factors:
+    1. the format that the client will accept (Accept header),
+    2. the format that the application can produce,
+    3. the content policy specified by the action method,
+    4. the type returned by the action method.
+    
    
